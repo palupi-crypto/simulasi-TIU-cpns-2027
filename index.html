@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi CAT CPNS - SKD TIU Pola Bilangan</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Header Resmi CAT BKN -->
+    <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-md border-b-4 border-amber-500">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-2">
+            <div class="flex items-center space-x-3">
+                <div class="bg-amber-500 text-blue-950 font-black px-3 py-1.5 rounded-lg text-sm tracking-wider shadow">CAT BKN</div>
+                <div>
+                    <h1 class="font-bold text-base md:text-lg tracking-wide">SELEKSI KOMPETENSI DASAR (SKD) CPNS</h1>
+                    <p class="text-xs text-blue-200">Materi: Tes Inteligensia Umum (TIU) - Pola Bilangan & Operasi Hitung</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4 bg-blue-950/60 px-4 py-2 rounded-lg border border-blue-800/60 text-sm">
+                <div>
+                    <span class="block text-[10px] text-blue-300 uppercase tracking-wider font-semibold">Peserta</span>
+                    <span class="font-bold text-amber-300">PESERTA-CPNS-2026</span>
+                </div>
+                <div class="h-8 w-px bg-blue-800"></div>
+                <div class="text-right">
+                    <span class="block text-[10px] text-blue-300 uppercase tracking-wider font-semibold">Sisa Waktu</span>
+                    <span id="timer" class="font-mono font-bold text-amber-400 text-base">01:30:00</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl w-full mx-auto p-3 md:p-6 flex-grow flex flex-col">
+
+        <!-- Halaman Tes (Kuis Aktif) -->
+        <div id="test-screen" class="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-grow">
+            
+            <!-- Panel Kiri: Soal Aktif & Pilihan Ganda -->
+            <div class="lg:col-span-3 bg-white rounded-xl shadow-md border border-slate-200 p-5 md:p-8 flex flex-col justify-between">
+                <div>
+                    <!-- Keterangan Nomor Soal & Kategori -->
+                    <div class="flex justify-between items-center pb-4 mb-4 border-b border-slate-100">
+                        <div class="flex items-center space-x-2">
+                            <span id="badge-kategori" class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md">Kisi-Kisi 1</span>
+                            <span class="text-xs font-semibold text-slate-400">Soal No. <span id="current-question-num">1</span> dari 12</span>
+                        </div>
+                        <label class="flex items-center space-x-2 text-xs font-medium text-slate-600 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
+                            <input type="checkbox" id="doubt-checkbox" onchange="toggleRagu()" class="rounded text-amber-600 focus:ring-amber-500 w-4 h-4">
+                            <span class="text-amber-700 font-semibold">Ragu-ragu</span>
+                        </label>
+                    </div>
+
+                    <!-- Teks Soal -->
+                    <div class="mb-6">
+                        <p id="question-text" class="text-base md:text-lg font-medium text-slate-900 leading-relaxed"></p>
+                    </div>
+
+                    <!-- Pilihan Ganda (A, B, C, D, E) -->
+                    <div id="options-container" class="space-y-3 mb-6">
+                        <!-- Opsi akan dirender via JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Tombol Navigasi Bawah Soal -->
+                <div class="pt-4 border-t border-slate-100 flex justify-between items-center">
+                    <button onclick="prevQuestion()" id="btn-prev" class="px-5 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold text-sm hover:bg-slate-50 transition shadow-sm disabled:opacity-40 disabled:cursor-not-allowed">
+                        &larr; Sebelumnya
+                    </button>
+                    <div class="flex space-x-3">
+                        <button onclick="nextQuestion()" id="btn-next" class="px-6 py-2.5 rounded-lg bg-blue-700 text-white font-semibold text-sm hover:bg-blue-800 transition shadow">
+                            Selanjutnya &rarr;
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Kanan: Navigasi Nomor Soal & Aksi Selesai -->
+            <div class="lg:col-span-1 flex flex-col space-y-4">
+                <div class="bg-white rounded-xl shadow-md border border-slate-200 p-5 flex flex-col justify-between flex-grow">
+                    <div>
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+                            <h3 class="font-bold text-slate-800 text-sm">Daftar Nomor Soal</h3>
+                            <span class="text-xs text-slate-500 font-medium">Navigasi CAT</span>
+                        </div>
+                        
+                        <!-- Grid Kotak Nomor Soal -->
+                        <div id="number-grid" class="grid grid-cols-4 gap-2.5 mb-6">
+                            <!-- Dirender via JS -->
+                        </div>
+
+                        <!-- Keterangan Status Warna -->
+                        <div class="space-y-1.5 text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200/80 mb-6">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3.5 h-3.5 rounded bg-blue-700"></div>
+                                <span>Sedang dipilih</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3.5 h-3.5 rounded bg-emerald-600"></div>
+                                <span>Sudah dijawab</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3.5 h-3.5 rounded bg-amber-500"></div>
+                                <span>Ragu-ragu</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3.5 h-3.5 rounded bg-slate-200"></div>
+                                <span>Belum dijawab</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tombol Selesai Ujian -->
+                    <button onclick="openConfirmModal()" class="w-full py-3 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 text-white font-bold rounded-xl shadow-md transition text-sm tracking-wide">
+                        Selesai Ujian
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Halaman Hasil / Nilai & Pembahasan (Hidden by Default) -->
+        <div id="result-screen" class="hidden bg-white rounded-xl shadow-lg border border-slate-200 p-6 md:p-10 max-w-4xl mx-auto w-full">
+            <div class="text-center pb-6 border-b border-slate-200 mb-8">
+                <div class="inline-block bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wider">Ujian Selesai</div>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">HASIL SIMULASI TES SKD CPNS</h2>
+                <p class="text-sm text-slate-500">Analisis Hasil Ujian Tes Inteligensia Umum (TIU) - Pola Bilangan</p>
+            </div>
+
+            <!-- Ringkasan Statistik -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+                    <span class="block text-xs font-bold text-blue-600 uppercase mb-1">Total Soal</span>
+                    <span class="text-2xl font-black text-blue-900">12</span>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+                    <span class="block text-xs font-bold text-emerald-600 uppercase mb-1">Jawaban Benar</span>
+                    <span id="score-correct" class="text-2xl font-black text-emerald-700">0</span>
+                </div>
+                <div class="bg-rose-50 border border-rose-200 rounded-xl p-4 text-center">
+                    <span class="block text-xs font-bold text-rose-600 uppercase mb-1">Jawaban Salah</span>
+                    <span id="score-wrong" class="text-2xl font-black text-rose-700">0</span>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+                    <span class="block text-xs font-bold text-amber-600 uppercase mb-1">Skor Akhir (TIU)</span>
+                    <span id="score-points" class="text-2xl font-black text-amber-700">0</span>
+                    <span class="block text-[10px] text-slate-500 mt-0.5">(Skala 0 - 100)</span>
+                </div>
+            </div>
+
+            <!-- Daftar Pembahasan Lengkap -->
+            <h3 class="font-bold text-slate-800 text-lg mb-4 pb-2 border-b border-slate-200">Pembahasan &amp; Kunci Jawaban Lengkap</h3>
+            <div id="explanation-container" class="space-y-6 mb-8">
+                <!-- Dirender via JS -->
+            </div>
+
+            <div class="text-center">
+                <button onclick="restartTest()" class="px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-xl shadow transition text-sm">
+                    Ulangi Simulasi Ujian
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer Copyright -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-6">
+        Simulasi CAT CPNS Mandiri &bull; Berbasis Kisi-Kisi Resmi BKN &amp; 10 Pola Bilangan + HOTS
+    </footer>
+
+    <!-- Modal Konfirmasi Selesai Ujian -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 text-center border border-slate-200">
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">!</div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Konfirmasi Selesai Ujian</h3>
+            <p class="text-sm text-slate-600 mb-6">Apakah Anda yakin ingin mengakhiri ujian dan melihat hasil skor beserta pembahasannya sekarang?</p>
+            <div class="flex space-x-3">
+                <button onclick="closeConfirmModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition">
+                    Lanjutkan Ujian
+                </button>
+                <button onclick="finishTest()" class="flex-1 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-xl text-sm transition shadow">
+                    Ya, Selesai
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Aplikasi CAT -->
+    <script>
+        // Data Soal Lengkap Sesuai 10 Kisi-Kisi + 2 HOTS
+        const questionsData = [
+            {
+                id: 1,
+                kisi: "Kisi-Kisi 1: Pola perkalian ditambah atau dikurangi konstanta",
+                question: "Tentukan dua angka selanjutnya dari barisan berikut: 3, 7, 15, 31, 63, ...",
+                options: [
+                    "125 dan 250",
+                    "127 dan 255",
+                    "129 dan 257",
+                    "131 dan 261",
+                    "135 dan 271"
+                ],
+                correct: 1, // Indeks B
+                discussion: "Setiap suku dikalikan 2 lalu ditambah 1 (×2 + 1). 63 × 2 + 1 = 127; 127 × 2 + 1 = 255."
+            },
+            {
+                id: 2,
+                kisi: "Kisi-Kisi 2: Pola perkalian dengan perubahan faktor",
+                question: "Tentukan angka yang belum diketahui pada barisan berikut: 2, 4, 12, 48, 240, ...",
+                options: [
+                    "960",
+                    "1200",
+                    "1440",
+                    "1680",
+                    "1920"
+                ],
+                correct: 2, // Indeks C
+                discussion: "Faktor pengali bertambah secara teratur (×2, ×3, ×4, ×5, ×6). Maka 240 × 6 = 1440."
+            },
+            {
+                id: 3,
+                kisi: "Kisi-Kisi 3: Pola bilangan kuadrat ditambah atau dikurangi konstanta",
+                question: "Carilah suku ke-6 dari barisan bilangan berikut: 2, 5, 10, 17, 26, ...",
+                options: [
+                    "35",
+                    "36",
+                    "37",
+                    "38",
+                    "40"
+                ],
+                correct: 2, // Indeks C
+                discussion: "Barisan ini mengikuti pola n² + 1 (di mana n adalah nomor urut suku). Suku ke-6 = 6² + 1 = 36 + 1 = 37."
+            },
+            {
+                id: 4,
+                kisi: "Kisi-Kisi 4: Pola perkalian dengan operasi pengurangan",
+                question: "Tentukan angka selanjutnya dari barisan: 5, 13, 29, 61, 125, ...",
+                options: [
+                    "245",
+                    "249",
+                    "251",
+                    "253",
+                    "257"
+                ],
+                correct: 3, // Indeks D
+                discussion: "Pola yang digunakan adalah dikalikan 2 lalu ditambah 3 (×2 + 3). 125 × 2 + 3 = 253."
+            },
+            {
+                id: 5,
+                kisi: "Kisi-Kisi 5: Pola perkalian selang-seling",
+                question: "Tentukan dua suku berikutnya dari barisan: 4, 12, 6, 18, 9, 27, ...",
+                options: [
+                    "12 dan 36",
+                    "13 dan 39",
+                    "13,5 dan 40,5",
+                    "14 dan 42",
+                    "15 dan 45"
+                ],
+                correct: 2, // Indeks C
+                discussion: "Operasi selang-seling: ×3, ÷2, ×3, ÷2, ×3. Suku berikutnya: 27 ÷ 2 = 13,5; lalu 13,5 × 3 = 40,5."
+            },
+            {
+                id: 6,
+                kisi: "Kisi-Kisi 6: Pola pembagian dan sisa pembagian",
+                question: "Suatu pola bilangan berulang dalam siklus sisa bagi: 2, 6, 1, 3, 2, 6, 1, 3, ... Tentukan angka ke-50 dalam barisan tersebut!",
+                options: [
+                    "1",
+                    "2",
+                    "3",
+                    "6",
+                    "4"
+                ],
+                correct: 3, // Indeks D
+                discussion: "Pola siklus berulang setiap 4 angka [2, 6, 1, 3]. Posisi 50 dibagi 4 = 12 sisa 2. Sisa 2 menunjukkan angka kedua dalam siklus yaitu 6."
+            },
+            {
+                id: 7,
+                kisi: "Kisi-Kisi 7: Pola penjumlahan dengan setengah nilai bilangan",
+                question: "Tentukan dua suku berikutnya dari barisan: 40, 60, 90, 135, ...",
+                options: [
+                    "180 dan 270",
+                    "190,5 dan 285,75",
+                    "202,5 dan 303,75",
+                    "210 dan 315",
+                    "220 dan 330"
+                ],
+                correct: 2, // Indeks C
+                discussion: "Setiap suku ditambah dengan setengah dari nilainya sendiri (×1,5). 135 + 67,5 = 202,5; 202,5 + 101,25 = 303,75."
+            },
+            {
+                id: 8,
+                kisi: "Kisi-Kisi 8: Pola perkalian dengan konstanta tertentu",
+                question: "Tentukan suku ke-7 dari barisan geometri berikut: 3, 6, 12, 24, ...",
+                options: [
+                    "96",
+                    "128",
+                    "144",
+                    "160",
+                    "192"
+                ],
+                correct: 4, // Indeks E
+                discussion: "Menggunakan rumus barisan geometri Un = a · r^(n-1). U7 = 3 × 2^(7-1) = 3 × 64 = 192."
+            },
+            {
+                id: 9,
+                kisi: "Kisi-Kisi 9: Identifikasi pola berdasarkan perubahan nilai antarkolom",
+                question: "Perhatikan tabel matriks berikut. Tentukan nilai X yang hilang!\nKolom A=4, B=5 -> C=27\nKolom A=6, B=3 -> C=21\nKolom A=8, B=4 -> C=X",
+                options: [
+                    "24",
+                    "26",
+                    "28",
+                    "30",
+                    "32"
+                ],
+                correct: 2, // Indeks C
+                discussion: "Pola relasi kolom: C = (Kolom A × 3) + Kolom B. Untuk baris 3: (8 × 3) + 4 = 24 + 4 = 28."
+            },
+            {
+                id: 10,
+                kisi: "Kisi-Kisi 10: Kombinasi pola bilangan dan operasi hitung",
+                question: "Tentukan nilai dari persamaan operasi unik berikut: 4 ⊙ 3 = 19,  5 ⊙ 2 = 22,  6 ⊙ 4 = ?",
+                options: [
+                    "24",
+                    "26",
+                    "28",
+                    "30",
+                    "32"
+                ],
+                correct: 2, // Indeks C
+                discussion: "Operasi didefinisikan sebagai (A × 4) + (B × 1). Baris 1: (4×4)+(3×1)=19. Baris 2: (5×4)+(2×1)=22. Baris 3: (6×4)+(4×1) = 28."
+            },
+            {
+                id: 11,
+                kisi: "Variasi HOTS 1: Pola Bilangan Bertingkat Kompleks",
+                question: "Diberikan barisan bertingkat: 2, 5, 12, 27, 56, 115, ... Tentukan jumlah dari dua suku berikutnya setelah 115!",
+                options: [
+                    "698",
+                    "705",
+                    "719",
+                    "732",
+                    "745"
+                ],
+                correct: 2, // Indeks C
+                discussion: "Pola Un = (Un-1 × 2) + n. Suku ke-7 = (115 × 2) + 7 = 237. Suku ke-8 = (237 × 2) + 8 = 482. Jumlah = 237 + 482 = 719."
+            },
+            {
+                id: 12,
+                kisi: "Variasi HOTS 2: Matriks Relasi 4 Kolom Lanjutan",
+                question: "Tentukan nilai variabel P pada matriks relasi bilangan: [3, 4, 2 -> 26], [5, 2, 3 -> 31], [4, 6, 5 -> P]",
+                options: [
+                    "64",
+                    "68",
+                    "70",
+                    "74",
+                    "80"
+                ],
+                correct: 3, // Indeks D
+                discussion: "Pola: Kolom 4 = (Kolom 1 × Kolom 2) + (Kolom 3 × Kolom 3) + Kolom 3. Baris 3: (4 × 6) + (5 × 5) + 5 = 24 + 25 + 25 = 74."
+            }
+        ];
+
+        // State Aplikasi
+        let currentIdx = 0;
+        let userAnswers = new Array(questionsData.length).fill(null);
+        let userDoubts = new Array(questionsData.length).fill(false);
+        let timerSeconds = 90 * 60; // 90 menit waktu SKD TIU
+        let timerInterval = null;
+
+        // Inisialisasi Saat Halaman Dimuat
+        window.onload = function() {
+            renderQuestion();
+            renderNumberGrid();
+            startTimer();
+        };
+
+        // Fungsi Timer Countdown
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timerSeconds > 0) {
+                    timerSeconds--;
+                    let hours = Math.floor(timerSeconds / 3600);
+                    let minutes = Math.floor((timerSeconds % 3600) / 60);
+                    let seconds = timerSeconds % 60;
+                    document.getElementById('timer').innerText = 
+                        `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+                } else {
+                    clearInterval(timerInterval);
+                    finishTest();
+                }
+            }, 1000);
+        }
+
+        // Render Soal Aktif
+        function renderQuestion() {
+            const q = questionsData[currentIdx];
+            document.getElementById('current-question-num').innerText = q.id;
+            document.getElementById('badge-kategori').innerText = q.kisi;
+            document.getElementById('question-text').innerText = q.question;
+            
+            // Checkbox Ragu-ragu
+            document.getElementById('doubt-checkbox').checked = userDoubts[currentIdx];
+
+            // Render Opsi PG
+            let optionsHTML = '';
+            const labels = ['A', 'B', 'C', 'D', 'E'];
+            q.options.forEach((opt, idx) => {
+                const isChecked = userAnswers[currentIdx] === idx;
+                optionsHTML += `
+                    <label class="flex items-start space-x-3 p-3.5 rounded-xl border transition cursor-pointer ${isChecked ? 'border-blue-600 bg-blue-50/70 shadow-sm' : 'border-slate-200 hover:bg-slate-50'}">
+                        <input type="radio" name="option" value="${idx}" ${isChecked ? 'checked' : ''} onclick="selectAnswer(${idx})" class="mt-0.5 text-blue-600 focus:ring-blue-500 w-4 h-4">
+                        <span class="font-bold text-slate-700 w-5">${labels[idx]}.</span>
+                        <span class="text-slate-800 text-sm md:text-base">${opt}</span>
+                    </label>
+                `;
+            });
+            document.getElementById('options-container').innerHTML = optionsHTML;
+
+            // Tombol Navigasi Prev/Next
+            document.getElementById('btn-prev').disabled = currentIdx === 0;
+            const btnNext = document.getElementById('btn-next');
+            if (currentIdx === questionsData.length - 1) {
+                btnNext.innerText = "Selesai Ujian";
+                btnNext.className = "px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg transition shadow";
+                btnNext.setAttribute("onclick", "openConfirmModal()");
+            } else {
+                btnNext.innerText = "Selanjutnya →";
+                btnNext.className = "px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm rounded-lg transition shadow";
+                btnNext.setAttribute("onclick", "nextQuestion()");
+            }
+
+            renderNumberGrid();
+        }
+
+        // Pilih Jawaban
+        function selectAnswer(optionIdx) {
+            userAnswers[currentIdx] = optionIdx;
+            // Jika dijawab, hilangkan status ragu otomatis agar kembali hijau, atau biarkan jika user ingin tetap ragu
+            renderQuestion();
+        }
+
+        // Toggle Ragu-Ragu
+        function toggleRagu() {
+            userDoubts[currentIdx] = document.getElementById('doubt-checkbox').checked;
+            renderNumberGrid();
+        }
+
+        // Navigasi Antar Soal
+        function prevQuestion() {
+            if (currentIdx > 0) {
+                currentIdx--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIdx < questionsData.length - 1) {
+                currentIdx++;
+                renderQuestion();
+            }
+        }
+
+        function goToQuestion(idx) {
+            currentIdx = idx;
+            renderQuestion();
+        }
+
+        // Render Grid Nomor Soal di Panel Kanan
+        function renderNumberGrid() {
+            let gridHTML = '';
+            questionsData.forEach((q, idx) => {
+                let statusClass = "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200";
+                
+                if (currentIdx === idx) {
+                    statusClass = "bg-blue-700 text-white border-blue-800 ring-2 ring-blue-300 font-bold";
+                } else if (userDoubts[idx]) {
+                    statusClass = "bg-amber-500 text-white border-amber-600 font-bold";
+                } else if (userAnswers[idx] !== null) {
+                    statusClass = "bg-emerald-600 text-white border-emerald-700 font-bold";
+                }
+
+                gridHTML += `
+                    <button onclick="goToQuestion(${idx})" class="h-10 rounded-lg border text-sm font-semibold transition flex items-center justify-center ${statusClass}">
+                        ${idx + 1}
+                    </button>
+                `;
+            });
+            document.getElementById('number-grid').innerHTML = gridHTML;
+        }
+
+        // Modal Konfirmasi Selesai
+        function openConfirmModal() {
+            document.getElementById('confirm-modal').classList.remove('hidden');
+            document.getElementById('confirm-modal').classList.add('flex');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.remove('flex');
+            document.getElementById('confirm-modal').classList.add('hidden');
+        }
+
+        // Selesai Ujian & Hitung Nilai
+        function finishTest() {
+            closeConfirmModal();
+            clearInterval(timerInterval);
+
+            // Hitung Skor
+            let correctCount = 0;
+            let wrongCount = 0;
+            questionsData.forEach((q, idx) => {
+                if (userAnswers[idx] === q.correct) {
+                    correctCount++;
+                } else if (userAnswers[idx] !== null) {
+                    wrongCount++;
+                }
+            });
+
+            // Skor TIU standar CPNS: Benar = +5 poin per soal, Salah/Kosong = 0 (total maksimal 500 untuk 100 soal, disesuaikan skala 100 max untuk 12 soal = (benar/12)*100 atau sistem bobot)
+            let finalScore = Math.round((correctCount / questionsData.length) * 100);
+
+            document.getElementById('score-correct').innerText = correctCount;
+            document.getElementById('score-wrong').innerText = wrongCount;
+            document.getElementById('score-points').innerText = finalScore;
+
+            // Render Pembahasan
+            let expHTML = '';
+            const labels = ['A', 'B', 'C', 'D', 'E'];
+            questionsData.forEach((q, idx) => {
+                const userAns = userAnswers[idx];
+                const isCorrect = userAns === q.correct;
+                expHTML += `
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-bold text-slate-800 text-sm">Soal No. ${q.id} (${q.kisi})</span>
+                            <span class="px-2.5 py-0.5 rounded text-xs font-bold ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                                ${isCorrect ? 'Benar (+5)' : 'Salah (0)'}
+                            </span>
+                        </div>
+                        <p class="text-slate-900 text-sm font-medium mb-3">${q.question}</p>
+                        <div class="text-xs space-y-1 mb-3">
+                            <p class="text-slate-600">Jawaban Anda: <strong class="${isCorrect ? 'text-emerald-700' : 'text-rose-700'}">${userAns !== null ? labels[userAns] + '. ' + q.options[userAns] : 'Tidak dijawab'}</strong></p>
+                            <p class="text-slate-600">Kunci Jawaban: <strong class="text-emerald-700">${labels[q.correct]}. ${q.options[q.correct]}</strong></p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-slate-200 text-xs text-slate-700 leading-relaxed">
+                            <strong class="text-blue-900 block mb-1">Pembahasan:</strong>
+                            ${q.discussion}
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('explanation-container').innerHTML = expHTML;
+
+            // Sembunyikan tes, tampilkan hasil
+            document.getElementById('test-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Restart Simulasi
+        function restartTest() {
+            currentIdx = 0;
+            userAnswers = new Array(questionsData.length).fill(null);
+            userDoubts = new Array(questionsData.length).fill(false);
+            timerSeconds = 90 * 60;
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('test-screen').classList.remove('grid');
+            document.getElementById('test-screen').classList.remove('hidden');
+            document.getElementById('test-screen').classList.add('grid');
+            renderQuestion();
+            startTimer();
+        }
+    </script>
+</body>
+</html>
